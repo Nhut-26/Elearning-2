@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 #include <limits>
+#include <cctype>
+
 using namespace std;
 
 struct Date {
@@ -250,6 +252,45 @@ void inMaNV(const NhanVien& nv){
          << " | ThucLinh: " << thucLinh(nv)
          << "\n";
 }
+// ======= Tim kiem theo ten ==============
+string toLowerStr(string s){
+    for(char &c : s){
+        c = (char)tolower((unsigned char)c);
+    }
+            return s;
+}
+
+void timVaInTheoTen(NV head, const string &ten){
+    string k = toLowerStr(ten);
+    bool found = false;
+    while(head != NULL){
+        if(toLowerStr(head->data.hoTen) == k){
+            inMaNV(head->data);
+            found = true;
+        }
+        head = head->next;
+    }
+    if(!found) cout << "Khong tim thay!\n";
+}
+// ====== In Nhan Vien co luong thuc linh thap nhat ra man hinh ====== (su dung thuat toan tuyen tinh)
+void thucLinhThapNhat(NV head){
+    if(head == NULL){
+        cout << "Danh Sach rong \n";
+        return;
+    }
+    long long minluong = thucLinh(head->data);
+        for(NV p = head; p != NULL ; p = p->next){
+            long long tl = thucLinh(p->data);
+            if(tl < minluong) minluong = tl;
+        }
+    cout <<"Thuc linh thap nhat: " << minluong << endl;
+    for(NV p = head; p != NULL ; p = p->next){
+        if(thucLinh(p->data) == minluong){
+            inMaNV(p->data);
+        }
+    }
+}
+
 // ====== MAIN demo: nhap -> ghi -> doc -> in ======
 int main() {
     NV head = NULL;
@@ -260,6 +301,8 @@ int main() {
         cout <<"2. In danh sach Nhan Vien\n";
         cout <<"3. Doc file danh sach nhan vien\n";
         cout <<"4. Tim thong tin nhan vien theo ma nhan vien\n";
+        cout <<"5. Tim nhan vien theo ten\n";
+        cout <<"6. In luong thuc linh thap nhat ra man hinh\n";
         cout <<"0. Thoat\n";
         cout <<"Nhap lua chon ";
         int lc; cin >> lc;
@@ -277,7 +320,19 @@ int main() {
             cin >> ma;
             NV p = timTheoMa(head,ma);
             inMaNV(p->data);
+        }else if(lc == 5){
+            string ten;
+            cout << "Nhap ten nhan vien can tim: ";
+            cin.ignore();
+            getline(cin, ten);
+            
+            timVaInTheoTen(head,ten);
+        }else if(lc == 6){
+            thucLinhThapNhat(head);
         }
+
+
+
         else if(lc == 0){
             break;
         }
