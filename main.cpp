@@ -290,7 +290,53 @@ void thucLinhThapNhat(NV head){
         }
     }
 }
+// ====== Sap xep nhan vien giam dan roi in ra file ====== (Dung thuat toan merge sort)
+NV merge2List(NV a, NV b){
+    if(a == NULL) return b;
+    if(b == NULL) return a;
 
+    long long ta = thucLinh(a->data);
+    long long tb = thucLinh(b->data);
+    NV ketqua = NULL;
+    if(ta > tb || (ta == tb && a->data.maNV < b->data.maNV)){
+        ketqua = a;
+        ketqua->next = merge2List(a->next, b);
+    }else{
+        ketqua = b;
+        ketqua->next = merge2List(a, b->next);
+    }
+    return ketqua;
+}
+void chiaDanhSach(NV ds, NV& truoc, NV& sau){
+    if(ds == NULL || ds->next == NULL){
+        truoc = ds;
+        sau = NULL;
+        return;
+    }
+    NV slow = ds;
+    NV fast = ds->next;
+    while(fast != NULL){
+        fast = fast->next;
+        if(fast != NULL){
+            slow = slow->next;
+            fast = fast->next;
+        }
+    }
+    truoc = ds;
+    sau = slow->next;
+    slow->next = NULL;
+}
+void mergeSort(NV& head){
+    if(head == NULL || head->next == NULL) return;
+
+    NV a, b;
+    chiaDanhSach(head, a, b);
+
+    mergeSort(a);
+    mergeSort(b);
+
+    head = merge2List(a, b);
+}
 // ====== MAIN demo: nhap -> ghi -> doc -> in ======
 int main() {
     NV head = NULL;
@@ -303,6 +349,7 @@ int main() {
         cout <<"4. Tim thong tin nhan vien theo ma nhan vien\n";
         cout <<"5. Tim nhan vien theo ten\n";
         cout <<"6. In luong thuc linh thap nhat ra man hinh\n";
+        cout <<"7. Sap xep nhan vien co thuc linh giam dan roi in ra file\n";
         cout <<"0. Thoat\n";
         cout <<"Nhap lua chon ";
         int lc; cin >> lc;
@@ -329,10 +376,10 @@ int main() {
             timVaInTheoTen(head,ten);
         }else if(lc == 6){
             thucLinhThapNhat(head);
+        }else if(lc == 7){
+            mergeSort(head);
+            ghiFile(head, "DSNV_SAPXEP.txt");
         }
-
-
-
         else if(lc == 0){
             break;
         }
