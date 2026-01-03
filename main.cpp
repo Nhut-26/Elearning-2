@@ -235,9 +235,10 @@ NV timTheoMa(NV head,const string& ma){
 
     for(NV p = head ; p != NULL ; p = p->next){
         if(p->data.maNV == ma) return p;
-
+        cout<<"rrr";
     }
     return NULL;
+    
 }
 // ======= In Danh sach theo ma nhan vien ========
 void inMaNV(const NhanVien& nv){
@@ -291,11 +292,34 @@ void thucLinhThapNhat(NV head){
     }
 }
 
+void sapXepThucLinh(NV head)
+{
+    if(head==NULL)
+    {
+        cout << "Danh sach rong \n";
+        return;
+    }
+    for(NV p = head; p != NULL; p = p -> next)
+    {
+        for(NV q = p -> next; q != NULL; q = q -> next)
+        {
+            if(thucLinh(q->data) > thucLinh(p->data))
+            {
+                NhanVien temp = q->data;
+                q->data = p->data;
+                p->data = temp;
+
+            }
+        }
+    }
+}
+
 // ====== MAIN demo: nhap -> ghi -> doc -> in ======
 int main() {
     NV head = NULL;
 
-    while(1){
+    int lc; 
+    while(lc != 0){
         cout <<"--------------MENU--------------\n";
         cout <<"1. Nhap danh sach Nhan Vien\n";
         cout <<"2. In danh sach Nhan Vien\n";
@@ -303,9 +327,10 @@ int main() {
         cout <<"4. Tim thong tin nhan vien theo ma nhan vien\n";
         cout <<"5. Tim nhan vien theo ten\n";
         cout <<"6. In luong thuc linh thap nhat ra man hinh\n";
+        cout << "7. Sap xep nhan vien giam dan theo thuc linh\n";
         cout <<"0. Thoat\n";
         cout <<"Nhap lua chon ";
-        int lc; cin >> lc;
+        cin >> lc;
         if(lc == 1){
             NhanVien nv = nhap1NV(head);
             append(head,nv);
@@ -330,14 +355,16 @@ int main() {
         }else if(lc == 6){
             thucLinhThapNhat(head);
         }
-
-
-
+        else if(lc==7){
+            sapXepThucLinh(head);
+            ghiFile(head, "DSNV_SAPXEP.txt");
+            docFile(head,"DSNV.txt");
+        }
         else if(lc == 0){
             break;
         }
+        else cout << "Cu phap khong hop le!\n";
     }
-
     freeList(head);
 
     return 0;
