@@ -231,7 +231,7 @@ void inDanhSach(NV head) {
     }
 }
 // ====== Tim theo ma nv =============
-NV timTheoMa(NV head,const string& ma){
+/*NV timTheoMa(NV head,const string& ma){
 
     for(NV p = head ; p != NULL ; p = p->next){
         if(p->data.maNV == ma) return p;
@@ -239,7 +239,7 @@ NV timTheoMa(NV head,const string& ma){
     }
     return NULL;
     
-}
+}*/
 // ======= In Danh sach theo ma nhan vien ========
 void inMaNV(const NhanVien& nv){
     cout << "MaNV: " << nv.maNV
@@ -266,6 +266,18 @@ void timVaInTheoTen(NV head, const string &ten){
     bool found = false;
     while(head != NULL){
         if(toLowerStr(head->data.hoTen) == k){
+            inMaNV(head->data);
+            found = true;
+        }
+        head = head->next;
+    }
+    if(!found) cout << "Khong Stim thay!\n";
+}
+// ======= Tim kiem theo ma ==============
+void timVaInTheoMa(NV head, const string &ma){
+    bool found = false;
+    while(head != NULL){
+        if(head->data.maNV == ma){
             inMaNV(head->data);
             found = true;
         }
@@ -352,13 +364,20 @@ while (lc != 0) {
             string ma;
             cout << "Nhap ma nhan vien can tim: ";
             cin >> ma;
+            timVaInTheoMa(head, ma);
+            break;
+        }
+        /*case 4: {
+            string ma;
+            cout << "Nhap ma nhan vien can tim: ";
+            cin >> ma;
             NV p = timTheoMa(head, ma);
             if (p != NULL)
                 inMaNV(p->data);
             else
                 cout << "Khong tim thay nhan vien!\n";
             break;
-        }
+        }*/
         case 5: {
             string ten;
             cout << "Nhap ten nhan vien can tim: ";
