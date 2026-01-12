@@ -328,9 +328,29 @@ void sapXepThucLinh(NV head)
     }
 }
 
+void xoaNhanVien(NV& head, const string& ma)
+{
+    if (head==NULL)
+    {
+        return;
+    }
+    for(NV p=head; p!=NULL; p=p->next)
+    {
+        if(p->data.maNV == ma)
+        {
+            NV temp = p;
+            p = p->next;
+            delete temp;
+        }
+    }
+
+}
+
 // ====== MAIN demo: nhap -> ghi -> doc -> in ======
 int main() {
+    string ma;
     NV head = NULL;
+    string ten;
 
    int lc = -1;
 
@@ -343,6 +363,7 @@ while (lc != 0) {
     cout << "5. Tim nhan vien theo ten\n";
     cout << "6. In luong thuc linh thap nhat ra man hinh\n";
     cout << "7. Sap xep nhan vien giam dan theo thuc linh\n";
+    cout << "8. Xoa nhan vien theo ma nhan vien\n";
     cout << "0. Thoat\n";
     cout << "Nhap lua chon: ";
     cin >> lc;
@@ -361,7 +382,6 @@ while (lc != 0) {
             docFile(head, "DSNV.txt");
             break;
         case 4: {
-            string ma;
             cout << "Nhap ma nhan vien can tim: ";
             cin >> ma;
             timVaInTheoMa(head, ma);
@@ -379,7 +399,6 @@ while (lc != 0) {
             break;
         }*/
         case 5: {
-            string ten;
             cout << "Nhap ten nhan vien can tim: ";
             cin.ignore();
             getline(cin, ten);
@@ -393,6 +412,12 @@ while (lc != 0) {
             docFile(head, "DSNV_SAPXEP.txt");
             sapXepThucLinh(head);
             ghiFile(head, "DSNV_SAPXEP.txt");
+            break;
+        case 8:     
+            cout << "Nhap ma nhan vien can xoa: ";
+            cin >> ma;
+            xoaNhanVien(head, ma);
+            ghiFile(head, "DSNV.txt");
             break;
         case 0:
             cout << "Thoat chuong trinh!\n";
