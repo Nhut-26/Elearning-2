@@ -21,19 +21,22 @@ struct NhanVien {
 long long thucLinh(const NhanVien& a) {
     return 1LL * a.ngayCongLamViec * a.luongNgay;
 }
+
 // ====== DSLK Don ======
 struct Node {
     NhanVien data;
     Node* next;
 };
 typedef struct Node* NV;
+
 NV createNode(const NhanVien& nv) {
     NV p = new Node;
     p->data = nv;
     p->next = NULL;
     return p;
 }
-// xoa cac node cu 
+
+// Xoa cac node cu 
 void freeList(NV& head) {
     while (head) {
         NV tmp = head;
@@ -41,7 +44,8 @@ void freeList(NV& head) {
         delete tmp;
     }
 }
-// kiem tra co trung ma nhan vien hay k
+
+// Kiem tra co trung ma nhan vien hay khong
 bool isDuplicateId(NV head, const string& id) {
     for (NV p = head; p != NULL; p = p->next) {
         if (p->data.maNV == id) return true;
@@ -61,8 +65,6 @@ void append(NV& head, const NhanVien& nv) {
 }
 
 // ====== Nhap ======
-
-
 NhanVien nhap1NV(NV head) {
     NhanVien nv;
 
@@ -84,6 +86,7 @@ NhanVien nhap1NV(NV head) {
     cout << "Nhap ngay/thang/nam sinh (vd: 1 12 2005): ";
     while (!(cin >> nv.d.ngay >> nv.d.thang >> nv.d.nam)) {
         cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Xoa bo dem
         cout << "Nhap sai! Vui long nhap lai (vd: 1 12 2005): ";
     }
 
@@ -100,29 +103,23 @@ NhanVien nhap1NV(NV head) {
     cout << "Nhap ngay cong lam viec: ";
     while (!(cin >> nv.ngayCongLamViec)) {
         cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Nhap sai! Vui long nhap so ngay cong: ";
     }
 
     cout << "Nhap luong ngay: ";
     while (!(cin >> nv.luongNgay)) {
         cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Nhap sai! Vui long nhap luong ngay: ";
     }
 
     return nv;
 }
 
-void nhapDanhSach(NV& head, int n) {
-    for (int i = 0; i < n; i++) {
-        cout << "\n===== NHAN VIEN " << (i + 1) << " =====\n";
-        NhanVien nv = nhap1NV(head);
-        append(head, nv);
-    }
-}
-
-// ====== Ghi file ======
+// ====== Ghi file (Ghi de - Dung cho ham Xoa/Sap xep) ======
 void ghiFile(NV head, const string& tenFile) {
-    ofstream fout(tenFile);
+    ofstream fout(tenFile); // Mac dinh la ios::out (ghi de)
     if (!fout.is_open()) {
         cout << "Khong mo duoc file " << tenFile << "\n";
         return;
@@ -143,7 +140,35 @@ void ghiFile(NV head, const string& tenFile) {
     }
 
     fout.close();
-    cout << "\nDa ghi danh sach ra file: " << tenFile << "\n";
+    cout << "\nDa ghi lai toan bo danh sach ra file: " << tenFile << "\n";
+}
+
+// ====== Ham moi: Ghi them vao cuoi file (Dung cho ham Nhap) ======
+void ghiThemVaoCuoiFile(const NhanVien& nv, const string& tenFile) {
+    // ios::app giup ghi noi tiep vao cuoi file
+    ofstream fout(tenFile, ios::app); 
+    if (!fout.is_open()) {
+        cout << "Khong mo duoc file de ghi them!\n";
+        return;
+    }
+    
+    // Kiem tra neu file rong thi ghi header truoc 
+    fout.seekp(0, ios::end);
+    if (fout.tellp() == 0) {
+        fout << "Ma_NV|HO_TEN|NGAY_SINH|EMAIL|DIA_CHI|SDT|NGAY_CONG|LUONG_NGAY|THUC_LINH\n";
+    }
+
+    fout << nv.maNV << '|'
+         << nv.hoTen << '|'
+         << nv.d.ngay << '/' << nv.d.thang << '/' << nv.d.nam << '|'
+         << nv.email << '|'
+         << nv.diachi << '|'
+         << nv.sdt << '|'
+         << nv.ngayCongLamViec << '|'
+         << nv.luongNgay << '|'
+         << thucLinh(nv) << "\n";
+
+    fout.close();
 }
 
 // ====== Doc file ======
@@ -160,10 +185,10 @@ bool docFile(NV& head, const string& tenFile) {
         return false;
     }
 
-    freeList(head);
+    freeList(head); // Xoa danh sach cu trong RAM truoc khi doc moi
 
     string line;
-    // bo header
+    // Bo qua dong header
     if (!getline(fin, line)) {
         fin.close();
         return false;
@@ -185,7 +210,7 @@ bool docFile(NV& head, const string& tenFile) {
         if (!getline(ss, sdt, '|')) continue;
         if (!getline(ss, ngayCongStr, '|')) continue;
         if (!getline(ss, luongNgayStr, '|')) continue;
-        getline(ss, thucLinhStr); // co/khong deu duoc
+        getline(ss, thucLinhStr);
 
         NhanVien nv;
         nv.maNV = maNV;
@@ -203,18 +228,23 @@ bool docFile(NV& head, const string& tenFile) {
             continue;
         }
 
-        // neu file co maNV trung, bo qua (giu dung yeu cau unique)
+        // tranh trung lap neu file loi
         if (isDuplicateId(head, nv.maNV)) continue;
 
         append(head, nv);
     }
 
     fin.close();
+    cout << "Da doc du lieu tu file " << tenFile << " len chuong trinh.\n";
     return true;
 }
 
 // ====== In danh sach ======
 void inDanhSach(NV head) {
+    if (head == NULL) {
+        cout << "\nDanh sach trong!\n";
+        return;
+    }
     cout << "\n=========== DANH SACH NHAN VIEN ===========\n";
     for (NV p = head; p != NULL; p = p->next) {
         const NhanVien& nv = p->data;
@@ -230,17 +260,8 @@ void inDanhSach(NV head) {
              << "\n";
     }
 }
-// ====== Tim theo ma nv =============
-/*NV timTheoMa(NV head,const string& ma){
 
-    for(NV p = head ; p != NULL ; p = p->next){
-        if(p->data.maNV == ma) return p;
-        cout<<"rrr";
-    }
-    return NULL;
-    
-}*/
-// ======= In Danh sach theo ma nhan vien ========
+// ======= In 1 Nhan Vien ========
 void inMaNV(const NhanVien& nv){
     cout << "MaNV: " << nv.maNV
          << " | HoTen: " << nv.hoTen
@@ -253,31 +274,21 @@ void inMaNV(const NhanVien& nv){
          << " | ThucLinh: " << thucLinh(nv)
          << "\n";
 }
-// ======= Tim kiem theo ten ==============
+
+// ======= Helper xu ly chuoi ========
 string toLowerStr(string s){
     for(char &c : s){
         c = (char)tolower((unsigned char)c);
     }
-            return s;
+    return s;
 }
 
+// ======= Tim kiem theo ten ==============
 void timVaInTheoTen(NV head, const string &ten){
     string k = toLowerStr(ten);
     bool found = false;
     while(head != NULL){
-        if(toLowerStr(head->data.hoTen) == k){
-            inMaNV(head->data);
-            found = true;
-        }
-        head = head->next;
-    }
-    if(!found) cout << "Khong Stim thay!\n";
-}
-// ======= Tim kiem theo ma ==============
-void timVaInTheoMa(NV head, const string &ma){
-    bool found = false;
-    while(head != NULL){
-        if(head->data.maNV == ma){
+        if(toLowerStr(head->data.hoTen).find(k) != string::npos){ // Tim gan dung
             inMaNV(head->data);
             found = true;
         }
@@ -285,17 +296,32 @@ void timVaInTheoMa(NV head, const string &ma){
     }
     if(!found) cout << "Khong tim thay!\n";
 }
-// ====== In Nhan Vien co luong thuc linh thap nhat ra man hinh ====== (su dung thuat toan tuyen tinh)
+
+// ======= Tim kiem theo ma ==============
+void timVaInTheoMa(NV head, const string &ma){
+    bool found = false;
+    while(head != NULL){
+        if(head->data.maNV == ma){
+            inMaNV(head->data);
+            found = true;
+            break;
+        }
+        head = head->next;
+    }
+    if(!found) cout << "Khong tim thay!\n";
+}
+
+// ====== In Nhan Vien thuc linh thap nhat ======
 void thucLinhThapNhat(NV head){
     if(head == NULL){
         cout << "Danh Sach rong \n";
         return;
     }
     long long minluong = thucLinh(head->data);
-        for(NV p = head; p != NULL ; p = p->next){
-            long long tl = thucLinh(p->data);
-            if(tl < minluong) minluong = tl;
-        }
+    for(NV p = head; p != NULL ; p = p->next){
+        long long tl = thucLinh(p->data);
+        if(tl < minluong) minluong = tl;
+    }
     cout <<"Thuc linh thap nhat: " << minluong << endl;
     for(NV p = head; p != NULL ; p = p->next){
         if(thucLinh(p->data) == minluong){
@@ -304,130 +330,135 @@ void thucLinhThapNhat(NV head){
     }
 }
 
-/*Sap xep theo selection sort*/
-
+// ====== Sap xep ======
 void sapXepThucLinh(NV head)
 {
-    if(head==NULL)
-    {
+    if(head==NULL) {
         cout << "Danh sach rong \n";
         return;
     }
-    for(NV p = head; p != NULL; p = p -> next)
-    {
-        for(NV q = p -> next; q != NULL; q = q -> next)
-        {
-            if(thucLinh(q->data) > thucLinh(p->data))
-            {
+    for(NV p = head; p != NULL; p = p -> next) {
+        for(NV q = p -> next; q != NULL; q = q -> next) {
+            if(thucLinh(q->data) > thucLinh(p->data)) {
                 NhanVien temp = q->data;
                 q->data = p->data;
                 p->data = temp;
-
             }
         }
     }
+    cout << "Da sap xep danh sach giam dan theo thuc linh.\n";
 }
 
+// ====== Xoa Nhan Vien  ======
 void xoaNhanVien(NV& head, const string& ma)
 {
-    if (head==NULL)
-    {
+    if (head == NULL) return;
+
+    // Truong hop node can xoa o dau
+    if (head->data.maNV == ma) {
+        NV temp = head;
+        head = head->next;
+        delete temp;
+        cout << "Da xoa nhan vien co ma: " << ma << endl;
         return;
     }
-    for(NV p=head; p!=NULL; p=p->next)
-    {
-        if(p->data.maNV == ma)
-        {
-            NV temp = p;
-            p = p->next;
+
+    // Truong hop node o giua hoac cuoi
+    NV p = head;
+    while (p->next != NULL) {
+        if (p->next->data.maNV == ma) {
+            NV temp = p->next;
+            p->next = p->next->next;
             delete temp;
+            cout << "Da xoa nhan vien co ma: " << ma << endl;
+            return;
         }
+        p = p->next;
     }
-
+    cout << "Khong tim thay ma nhan vien can xoa!\n";
 }
 
-// ====== MAIN demo: nhap -> ghi -> doc -> in ======
+// ====== MAIN ======
 int main() {
-    string ma;
     NV head = NULL;
+    string ma;
     string ten;
+    int lc = -1;
 
-   int lc = -1;
+    // Tu dong load du lieu cu khi mo chuong trinh (optional)
+    docFile(head, "DSNV.txt");
 
-while (lc != 0) {
-    cout << "--------------MENU--------------\n";
-    cout << "1. Nhap danh sach Nhan Vien\n";
-    cout << "2. In danh sach Nhan Vien\n";
-    cout << "3. Doc file danh sach nhan vien\n";
-    cout << "4. Tim thong tin nhan vien theo ma nhan vien\n";
-    cout << "5. Tim nhan vien theo ten\n";
-    cout << "6. In luong thuc linh thap nhat ra man hinh\n";
-    cout << "7. Sap xep nhan vien giam dan theo thuc linh\n";
-    cout << "8. Xoa nhan vien theo ma nhan vien\n";
-    cout << "0. Thoat\n";
-    cout << "Nhap lua chon: ";
-    cin >> lc;
+    while (lc != 0) {
+        cout << "\n--------------MENU--------------\n";
+        cout << "1. Nhap danh sach Nhan Vien (Them moi)\n";
+        cout << "2. In danh sach Nhan Vien ra man hinh\n";
+        cout << "3. Doc lai file danh sach nhan vien (Reset)\n";
+        cout << "4. Tim thong tin nhan vien theo ma\n";
+        cout << "5. Tim nhan vien theo ten\n";
+        cout << "6. In luong thuc linh thap nhat\n";
+        cout << "7. Sap xep giam dan theo thuc linh & Ghi file\n";
+        cout << "8. Xoa nhan vien theo ma & Ghi file\n";
+        cout << "0. Thoat\n";
+        cout << "Nhap lua chon: ";
+        cin >> lc;
 
-    switch (lc) {
-        case 1: {
-            NhanVien nv = nhap1NV(head);
-            append(head, nv);
-            ghiFile(head, "DSNV.txt");
-            break;
+        switch (lc) {
+            case 1: {
+                int n;
+                cout << "Nhap so luong nhan vien muon them: ";
+                cin >> n;
+                // Dung vong lap for de nhap va ghi noi tiep
+                for (int i = 0; i < n; i++) {
+                    cout << "\n--- Nhap thong tin nhan vien thu " << i + 1 << " ---\n";
+                    NhanVien nv = nhap1NV(head); // Nhap va check trung ma voi list hien tai
+                    
+                    append(head, nv); // Them vao bo nho chuong trinh
+                   
+                    ghiThemVaoCuoiFile(nv, "DSNV.txt"); 
+                }
+                cout << "\nDa them va ghi " << n << " nhan vien vao file DSNV.txt thanh cong!\n";
+                break;
+            }
+            case 2:
+                inDanhSach(head);
+                break;
+            case 3:
+                docFile(head, "DSNV.txt");
+                break;
+            case 4: {
+                cout << "Nhap ma nhan vien can tim: ";
+                cin >> ma;
+                timVaInTheoMa(head, ma);
+                break;
+            }
+            case 5: {
+                cout << "Nhap ten nhan vien can tim: ";
+                cin.ignore();
+                getline(cin, ten);
+                timVaInTheoTen(head, ten);
+                break;
+            }
+            case 6:
+                thucLinhThapNhat(head);
+                break;
+            case 7:
+                sapXepThucLinh(head);
+                ghiFile(head, "DSNV_SAPXEP.txt"); // Ghi file rieng cho sap xep
+                break;
+            case 8:     
+                cout << "Nhap ma nhan vien can xoa: ";
+                cin >> ma;
+                xoaNhanVien(head, ma);
+                ghiFile(head, "DSNV.txt"); // Xoa xong phai ghi de lai toan bo file
+                break;
+            case 0:
+                cout << "Thoat chuong trinh!\n";
+                break;
+            default:
+                cout << "Cu phap khong hop le!\n";
         }
-        case 2:
-            inDanhSach(head);
-            break;
-        case 3:
-            docFile(head, "DSNV.txt");
-            break;
-        case 4: {
-            cout << "Nhap ma nhan vien can tim: ";
-            cin >> ma;
-            timVaInTheoMa(head, ma);
-            break;
-        }
-        /*case 4: {
-            string ma;
-            cout << "Nhap ma nhan vien can tim: ";
-            cin >> ma;
-            NV p = timTheoMa(head, ma);
-            if (p != NULL)
-                inMaNV(p->data);
-            else
-                cout << "Khong tim thay nhan vien!\n";
-            break;
-        }*/
-        case 5: {
-            cout << "Nhap ten nhan vien can tim: ";
-            cin.ignore();
-            getline(cin, ten);
-            timVaInTheoTen(head, ten);
-            break;
-        }
-        case 6:
-            thucLinhThapNhat(head);
-            break;
-        case 7:
-            docFile(head, "DSNV_SAPXEP.txt");
-            sapXepThucLinh(head);
-            ghiFile(head, "DSNV_SAPXEP.txt");
-            break;
-        case 8:     
-            cout << "Nhap ma nhan vien can xoa: ";
-            cin >> ma;
-            xoaNhanVien(head, ma);
-            ghiFile(head, "DSNV.txt");
-            break;
-        case 0:
-            cout << "Thoat chuong trinh!\n";
-            break;
-        default:
-            cout << "Cu phap khong hop le!\n";
     }
-}
 
     freeList(head);
-
     return 0;
 }
